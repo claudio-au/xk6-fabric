@@ -1,0 +1,734 @@
+/*-
+ * ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
+ * Autonomic Proprietary 1.0
+ * ——————————————————————————————————————————————————————————————————————————————
+ * Copyright (C) 2018 Autonomic, LLC - All rights reserved
+ * ——————————————————————————————————————————————————————————————————————————————
+ * Proprietary and confidential.
+ *
+ * NOTICE:  All information contained herein is, and remains the property of
+ * Autonomic, LLC and its suppliers, if any.  The intellectual and technical
+ * concepts contained herein are proprietary to Autonomic, LLC and its suppliers
+ * and may be covered by U.S. and Foreign Patents, patents in process, and are
+ * protected by trade secret or copyright law. Dissemination of this information
+ * or reproduction of this material is strictly forbidden unless prior written
+ * permission is obtained from Autonomic, LLC.
+ *
+ * Unauthorized copy of this file, via any medium is strictly prohibited.
+ * ______________________________________________________________________________
+ */
+
+syntax = "proto3";
+
+package autonomic.ext.feed.admin;
+
+option go_package = "xk6-fabric/proto/autonomic/ext/feed/admin";
+option java_package = "com.autonomic.ext.feed.admin";
+option java_outer_classname = "FeedAdminProto";
+option java_multiple_files = true;
+
+option cc_enable_arenas = true;
+
+option objc_class_prefix = "AUT";
+
+import "google/protobuf/timestamp.proto";
+
+/*
+    Feed Admin
+*/
+service Admin {
+    /*
+       ListFlows()
+    */
+    rpc ListFlows (ListFlowsRequest) returns (ListFlowsResponse) {};
+
+    /*
+        CreateFlow()
+    */
+    rpc CreateFlow (CreateFlowRequest) returns (CreateFlowResponse) {};
+
+    /*
+        GetFlow()
+    */
+    rpc GetFlow (GetFlowRequest) returns (GetFlowResponse) {};
+
+    /*
+        UpdateFlow()
+    */
+    rpc UpdateFlow (UpdateFlowRequest) returns (UpdateFlowResponse) {};
+
+    /*
+        RegisterFlow()
+    */
+    rpc RegisterFlow (RegisterFlowRequest) returns (RegisterFlowResponse) {};
+
+    /*
+        UnregisterFlow()
+    */
+    rpc UnregisterFlow (UnregisterFlowRequest) returns (UnregisterFlowResponse) {};
+
+    /*
+        DeleteFlow()
+    */
+    rpc DeleteFlow (DeleteFlowRequest) returns (DeleteFlowResponse) {};
+
+    /*
+        ListTaps()
+    */
+    rpc ListTaps (ListTapsRequest) returns (ListTapsResponse) {};
+
+    /*
+        ListAllTaps()
+    */
+    rpc ListAllTaps (ListAllTapsRequest) returns (ListAllTapsResponse) {};
+
+    /*
+        CreateTap()
+    */
+    rpc CreateTap (CreateTapRequest) returns (CreateTapResponse) {};
+
+    /*
+        GetTap()
+    */
+    rpc GetTap (GetTapRequest) returns (GetTapResponse) {};
+
+    /*
+        UpdateTap()
+    */
+    rpc UpdateTap (UpdateTapRequest) returns (UpdateTapResponse) {};
+
+    /*
+        AddFilters()
+    */
+    rpc AddFilters (AddFiltersRequest) returns (AddFiltersResponse) {}
+
+    /*
+        DeleteFilters()
+    */
+    rpc DeleteFilters (DeleteFiltersRequest) returns (DeleteFiltersResponse) {}
+
+    /*
+        AddVins()
+    */
+    rpc AddVins (AddVinsRequest) returns (AddVinsResponse) {}
+
+    /*
+        DeleteVins()
+    */
+    rpc DeleteVins (DeleteVinsRequest) returns (DeleteVinsResponse) {}
+
+    /*
+         DeleteTap()
+    */
+    rpc DeleteTap (DeleteTapRequest) returns (DeleteTapResponse) {};
+}
+
+message AttributeFilter {
+    string name = 1;
+    string value = 2;
+}
+
+/* The IamFilter allow for the inclusion or exclusion of an asset's(vehicle) data based on
+ * the role a specific subject has on the asset(vehicle).
+ * For example:  "Include vehicles where 'subject' has the 'role' role on the vehicle"
+ */
+message IamFilter {
+    string subject = 1;
+    string role = 2;
+}
+
+message GroupFilter {
+    string group_id = 1;
+}
+
+message SqlFilter {
+    string expression = 1;
+}
+
+message VinFilter {
+    repeated string vins = 1;
+}
+
+/* The TagFilters allows for the inclusion/exclusion of signals/metrics based on device-defined
+ * properties.
+ */
+message TagFilter {
+    string tagKey = 1;
+    string tagValue = 2;
+}
+
+message DeviceFilter {
+    reserved 1;
+    string device_type = 2;
+}
+
+/* EpathFilter allows inclusion/exclusion of data items based on whether or not values
+ * at a given epath within the data item match a given string.
+ */
+message EpathFilter {
+  string path = 1;
+  string value = 2;
+}
+
+/* MetricTagFilter allows for the inclusion or exclusion of data elements
+ * containing Metric messages, with tags matching the indicated value.
+ */
+message MetricTagFilter {
+  string tagKey = 1;
+  string tagValue = 2;
+}
+
+enum FilterType {
+    UNDEFINED_TYPE = 0;
+    PERMIT = 1;
+    DENY = 2;
+}
+
+message EventFilter {
+
+    FilterType type = 1;
+
+    uint32 sequence = 2;
+
+    oneof filter {
+        AttributeFilter attribute_filter = 3;
+        GroupFilter group_filter = 4;
+        SqlFilter sql_filter = 5;
+        IamFilter iam_filter = 6;
+        VinFilter vin_filter = 7;
+        TagFilter tag_filter = 8;
+        DeviceFilter device_filter = 9;
+        EpathFilter epath_filter = 10;
+        MetricTagFilter metric_tag_filter = 11;
+    }
+}
+
+message Service {
+    string service_name = 1;
+
+    google.protobuf.Timestamp added = 2;
+}
+
+message ListFlowsRequest {
+    string namespace = 1;
+}
+
+message ListFlowsResponse {
+
+    reserved 1;
+
+    repeated GetFlowResponse flows = 2;
+}
+
+message CreateFlowRequest {
+
+    string subject = 1;
+
+    string name = 2;
+
+    uint32 shard_count = 3;
+}
+
+message CreateFlowResponse {
+    uint64 total_messages = 1;
+
+    uint64 total_bytes = 2;
+
+    google.protobuf.Timestamp last_received = 3;
+
+    google.protobuf.Timestamp created = 4;
+
+    google.protobuf.Timestamp last_modified = 5;
+
+    string subject = 6;
+
+    string topic_name = 7;
+
+    string name = 8;
+
+    string uuid = 9;
+
+    int32 shard_count = 10;
+
+    repeated string input_taps = 11;
+
+    repeated string output_taps = 12;
+
+    repeated Service external_producers = 13;
+
+    repeated Service external_consumers = 14;
+}
+
+message GetFlowRequest {
+    string flow = 1;
+
+    string uuid = 2;
+
+    string subject = 3;
+}
+
+message ShardInfo {
+    bytes id = 1;
+
+    uint64 messages = 2;
+
+    uint64 bytes = 3;
+
+    google.protobuf.Timestamp last_received = 4;
+}
+
+message GetFlowResponse {
+    repeated ShardInfo shards = 1;
+
+    reserved 2;
+
+    uint64 total_messages = 3;
+
+    uint64 total_bytes = 4;
+
+    google.protobuf.Timestamp last_received = 5;
+
+    google.protobuf.Timestamp created = 6;
+
+    google.protobuf.Timestamp last_modified = 7;
+
+    string subject = 8;
+
+    string topic_name = 9;
+
+    string name = 10;
+
+    string uuid = 11;
+
+    int32 shard_count = 12;
+
+    repeated string input_taps = 13;
+
+    repeated string output_taps = 14;
+
+    repeated Service external_producers = 15;
+
+    repeated Service external_consumers = 16;
+}
+
+message UpdateFlowRequest {
+    string flow_name = 1;
+
+    string new_flow_name = 2;
+
+    string new_shard_count = 3;
+
+    string new_subject = 4;
+
+    string uuid = 5;
+
+    string subject = 6;
+}
+
+message UpdateFlowResponse {
+    repeated ShardInfo shards = 1;
+
+    repeated string taps = 2;
+
+    uint64 total_messages = 3;
+
+    uint64 total_bytes = 4;
+
+    google.protobuf.Timestamp last_received = 5;
+
+    google.protobuf.Timestamp created = 6;
+
+    google.protobuf.Timestamp last_modified = 7;
+
+    string subject = 8;
+
+    string topic_name = 9;
+
+    string name = 10;
+
+    string uuid = 11;
+
+    int32 shard_count = 12;
+
+    repeated string input_taps = 13;
+
+    repeated string output_taps = 14;
+
+    repeated Service external_producers = 15;
+
+    repeated Service external_consumers = 16;
+}
+
+message RegisterFlowRequest {
+    repeated Service external_producers = 1;
+
+    repeated Service external_consumers = 2;
+
+    string flow_name = 3;
+
+    string uuid = 4;
+}
+
+message RegisterFlowResponse {
+    repeated ShardInfo shards = 1;
+
+    repeated string taps = 2;
+
+    uint64 total_messages = 3;
+
+    uint64 total_bytes = 4;
+
+    google.protobuf.Timestamp last_received = 5;
+
+    google.protobuf.Timestamp created = 6;
+
+    google.protobuf.Timestamp last_modified = 7;
+
+    string subject = 8;
+
+    string topic_name = 9;
+
+    string name = 10;
+
+    string uuid = 11;
+
+    int32 shard_count = 12;
+
+    repeated string input_taps = 13;
+
+    repeated string output_taps = 14;
+
+    repeated Service external_producers = 15;
+
+    repeated Service external_consumers = 16;
+}
+
+message UnregisterFlowRequest {
+    repeated Service external_producers = 1;
+
+    repeated Service external_consumers = 2;
+
+    string flow_name = 3;
+
+    string uuid = 4;
+}
+
+message UnregisterFlowResponse {
+    repeated ShardInfo shards = 1;
+
+    repeated string taps = 2;
+
+    uint64 total_messages = 3;
+
+    uint64 total_bytes = 4;
+
+    google.protobuf.Timestamp last_received = 5;
+
+    google.protobuf.Timestamp created = 6;
+
+    google.protobuf.Timestamp last_modified = 7;
+
+    string subject = 8;
+
+    string topic_name = 9;
+
+    string name = 10;
+
+    string uuid = 11;
+
+    int32 shard_count = 12;
+
+    repeated string input_taps = 13;
+
+    repeated string output_taps = 14;
+
+    repeated Service external_producers = 15;
+
+    repeated Service external_consumers = 16;
+}
+
+message DeleteFlowRequest {
+    string flow = 1;
+
+    string uuid = 2;
+
+    string subject = 3;
+}
+
+message DeleteFlowResponse {
+
+}
+
+message CreateTapRequest {
+    string name = 1;
+
+    string input_flow = 2;
+
+    string output_flow = 3;
+
+    repeated EventFilter filters = 5;
+
+    string subject = 4;
+
+    string business_unit = 6; // Will be used to help track individual tap usage
+
+    string region = 7;
+}
+
+message CreateTapResponse {
+    string name = 1;
+
+    string input_flow = 2;
+
+    string output_flow = 3;
+
+    string uuid = 4;
+
+    repeated EventFilter filters = 5;
+
+    google.protobuf.Timestamp created = 6;
+
+    google.protobuf.Timestamp last_modified = 7;
+
+    string subject = 8;
+
+    string input_flow_id = 9;
+
+    string output_flow_id = 10;
+
+    TapRunningState state = 11;  // This will signal to users if the tap is running or not
+
+    string paused_at = 12; // Specifies where the data should continue to flow from (if paused)
+
+    string business_unit = 13; // Will be used to help track individual tap usage
+
+    string region = 14;
+}
+
+message ListTapsRequest {
+    string flow = 1;
+
+    string uuid = 2;
+
+    string subject = 3;
+}
+
+message ListTapsResponse {
+
+    reserved 1;
+
+    repeated GetTapResponse taps = 2;
+}
+
+message ListAllTapsRequest {
+    string namespace = 1;
+}
+
+message ListAllTapsResponse {
+    repeated GetTapResponse taps = 1;
+}
+
+message GetTapRequest {
+    string tap = 1;
+
+    string uuid = 2;
+
+    string subject = 3;
+}
+
+message GetTapResponse {
+
+    string name = 1;
+
+    string input_flow = 2;
+
+    string output_flow = 3;
+
+    string uuid = 4;
+
+    repeated EventFilter filters = 5;
+
+    google.protobuf.Timestamp last_matched = 6;
+
+    google.protobuf.Timestamp created = 7;
+
+    google.protobuf.Timestamp last_modified = 8;
+
+    string subject = 9;
+
+    string input_flow_id = 10;
+
+    string output_flow_id = 11;
+
+    TapRunningState state = 12;  // This will signal to users if the tap is running or not
+
+    string paused_at = 13; // Specifies where the data should continue to flow from (if paused)
+
+    string business_unit = 14; // Will be used to help track individual tap usage
+
+    string region = 15;
+}
+
+message UpdateTapRequest {
+    string tap_name = 1;
+
+    string new_tap_name = 2;
+
+    string new_input_flow = 3;
+
+    string new_output_flow = 4;
+
+    string new_subject = 5;
+
+    string uuid = 6;
+
+    string subject = 7;
+
+    TapRunningState state = 8;
+
+    string pause_at = 9; // Specifies where we should continue the data flow from
+
+    string new_business_unit = 10;
+
+    string new_region = 11;
+}
+
+message UpdateTapResponse {
+
+    string name = 1;
+
+    string input_flow = 2;
+
+    string output_flow = 3;
+
+    string uuid = 4;
+
+    repeated EventFilter filters = 5;
+
+    google.protobuf.Timestamp last_matched = 6;
+
+    google.protobuf.Timestamp created = 7;
+
+    google.protobuf.Timestamp last_modified = 8;
+
+    string subject = 9;
+
+    string input_flow_id = 10;
+
+    string output_flow_id = 11;
+
+    TapRunningState state = 12;  // This will signal to users if the tap is running or not
+
+    string paused_at = 13; // Specifies where the data should continue to flow from (if paused)
+
+    string business_unit = 14; // Will be used to help track individual tap usage
+
+    string region = 15;
+}
+
+message FilterStatistics { // unify this as is done on the consumer api
+
+    uint32 sequence = 1; // should this be something stable?
+
+    uint64 messages = 2;
+
+    uint64 bytes = 3;
+
+    google.protobuf.Timestamp last_matched = 4;
+
+    google.protobuf.Timestamp created = 5;
+}
+
+message GetFilterStatisticsRequest {
+    string tap = 1;
+}
+
+message GetFilterStatisticsResponse {
+
+    repeated FilterStatistics statistics = 1;
+}
+
+message AddFiltersRequest {
+
+    uint32 after_sequence = 1;
+
+    repeated EventFilter filters = 2;
+
+    string tap = 3;
+
+    string uuid = 4;
+
+    string subject = 5;
+}
+
+message AddFiltersResponse {
+
+    repeated EventFilter added_filters = 1;
+}
+
+message DeleteFiltersRequest {
+    repeated uint32 sequences = 1;
+
+    string tap = 2;
+
+    string uuid = 3;
+
+    string subject = 4;
+}
+
+message DeleteFiltersResponse {
+
+}
+
+message AddVinsRequest {
+    FilterType type = 1;
+
+    repeated string vins = 2;
+
+    string tap = 3;
+
+    string uuid = 4;
+
+    string subject = 5;
+}
+
+message AddVinsResponse {
+
+}
+
+message DeleteVinsRequest {
+    FilterType type = 1;
+
+    repeated string vins = 2;
+
+    string tap = 3;
+
+    string uuid = 4;
+
+    string subject = 5;
+}
+
+message DeleteVinsResponse {
+
+}
+
+
+message DeleteTapRequest {
+    string tap = 1;
+
+    string uuid = 2;
+
+    string subject = 3;
+}
+
+message DeleteTapResponse {
+
+}
+
+enum TapRunningState {
+    UNDEFINED_STATE = 0;
+    reserved 1;
+    STOPPED = 2;
+    STARTED = 3;
+    PAUSED = 4;
+}
