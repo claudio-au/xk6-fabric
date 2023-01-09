@@ -1,6 +1,6 @@
 # Fabric Envelope K6 Extension
 
-This extension for K6 (k6.io) helps to create Fabric envelopes objects as javascript/bytes.
+This extension for K6 (https://k6.io) helps to create Fabric envelopes objects as javascript/bytes.
 
 It is useful to be sent through Kafka topics
 
