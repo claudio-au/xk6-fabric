@@ -20,7 +20,7 @@ It will create a custom k6 bin with our extension and kafka extension
 To test the extension, run:
 
 * A Kafka cluster
-* Run the test.js script `./k6 run testjs`
+* Run the test.js script `./k6 run test.js`
 
 Check the messages on Kafka
 
