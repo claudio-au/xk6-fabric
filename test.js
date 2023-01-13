@@ -11,7 +11,7 @@ import {
 export let options = { maxRedirects: 4 };
 
 const brokers = ["localhost:9092"];
-const topic = "xk6_kafka_byte_array_topic";
+const topic = "flow-feed-au-workspace-test-sJyq";
 
 const writer = new Writer({
     brokers: brokers,
@@ -34,6 +34,8 @@ if (__VU == 0) {
 const getTimeStamp = () => {
     return new Date().getTime()
 }
+const wksSignal = fabric.getWellKnownSignalMap()
+
 const createOdometer = () => {
     let tags = [{
         "Name": "METRIC_UNITS",
@@ -42,7 +44,51 @@ const createOdometer = () => {
     return {
         "DoubleValue": 10.1,
         "MetricKind": 1,
-        "Signal": "ODOMETER",
+        "Signal": wksSignal.ODOMETER,
+        "StartTime": getTimeStamp(),
+        "Tags": tags,
+    }
+}
+
+const createFuelLevel = () => {
+    let tags = []
+    return {
+        "DoubleValue": 80,
+        "MetricKind": 1,
+        "Signal": wksSignal.FUEL_LEVEL,
+        "StartTime": getTimeStamp(),
+        "Tags": tags,
+    }
+}
+
+const createSeatBeltStatus = () => {
+    let tags = []
+    return {
+        "EnumValue": "SEAT_BELT_STATUS_BUCKLED",
+        "MetricKind": 1,
+        "Signal": wksSignal.SEAT_BELT_STATUS,
+        "StartTime": getTimeStamp(),
+        "Tags": tags,
+    }
+}
+
+const createPosition = () => {
+    let tags = []
+    return {
+        "PositionValue": {
+            "Location": [
+                {  
+                    "Latitude": 1.0,
+                    "Longitude": 2.0
+                }, 
+                {
+                    "Latitude": 3.0,
+                    "Longitude": 4.0
+                }
+            ]
+        },
+        "MetricKind": 1,
+        "Signal": wksSignal.POSITION,
         "StartTime": getTimeStamp(),
         "Tags": tags,
     }
@@ -50,7 +96,7 @@ const createOdometer = () => {
 
 export default () => {
 
-    let signals = [createOdometer(), createOdometer()]
+    let signals = [createOdometer(), createFuelLevel(), createSeatBeltStatus(), createPosition()]
     let data = {
         "AssetId": "aui:asset:vehicle:1234",
         "Source": "chat-telemetry-test",
@@ -72,7 +118,7 @@ export default () => {
     let messages = [
         {
             value: schemaRegistry.serialize({
-                data: Array.from(buffer, (x) => x),
+                data: Array.from(buffer),
                 schemaType: SCHEMA_TYPE_BYTES,
             }),
         }

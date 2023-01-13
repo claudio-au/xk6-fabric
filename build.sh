@@ -1,0 +1,1 @@
+xk6 build --with xk6-fabric=. --with github.com/mostafa/xk6-kafka 
