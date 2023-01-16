@@ -66,36 +66,47 @@ func (f *FabricEnvelope) GetWellKnownSignalMap() map[string]string {
 	return wksSignals
 }
 
-func (f *FabricEnvelope) ConnectProducer(brokersUrl []string) (sarama.SyncProducer, error) {
+func (f *FabricEnvelope) ConnectProducer(brokersUrl []string) (sarama.AsyncProducer, error) {
 	config := sarama.NewConfig()
 	config.Producer.Return.Successes = true
 	config.Producer.RequiredAcks = sarama.WaitForAll
 	config.Producer.Retry.Max = 5
-	// NewSyncProducer creates a new SyncProducer using the given broker addresses and configuration.
-	conn, err := sarama.NewSyncProducer(brokersUrl, config)
+
+	conn, err := sarama.NewAsyncProducer(brokersUrl, config)
+
 	if err != nil {
 		return nil, err
 	}
 	return conn, nil
 }
-func (f *FabricEnvelope) PushToQueue(brokersUrl []string, topic string, message []byte) error {
+func (f *FabricEnvelope) PushToQueue(brokersUrl []string, topic string, message []byte) (*sarama.ProducerMessage, error) {
 
 	producer, err := f.ConnectProducer(brokersUrl)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	defer producer.Close()
 	msg := &sarama.ProducerMessage{
 		Topic: topic,
 		Value: sarama.ByteEncoder(message),
 	}
+	producer.Input() <- msg
 
-	if _, _, err := producer.SendMessage(msg); err != nil {
-		log.Fatal(err)
-		return err
+	for {
+		select {
+		case result := <-producer.Successes():
+			return result, nil
+		case err := <-producer.Errors():
+			return nil, err
+		}
 	}
 
-	return nil
+	// if _, _, err := producer.SendMessage(msg); err != nil {
+	// 	log.Fatal(err)
+	// 	return err
+	// }
+
+	//return nil, nil
 }
 
 func convertToTimestamp(timestampValue int64) *timestamppb.Timestamp {
