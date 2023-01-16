@@ -11,6 +11,7 @@ import (
 
 	"go.k6.io/k6/js/modules"
 
+	sarama "github.com/Shopify/sarama"
 	"github.com/golang/protobuf/proto"
 	"google.golang.org/protobuf/types/known/anypb"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -63,6 +64,38 @@ func (f *FabricEnvelope) GetWellKnownSignalMap() map[string]string {
 	wksSignals["XEV_BATTERY_STATE_OF_CHARGE"] = "XEV_BATTERY_STATE_OF_CHARGE"
 	wksSignals["XEV_PLUG_CHARGER_STATUS"] = "XEV_PLUG_CHARGER_STATUS"
 	return wksSignals
+}
+
+func (f *FabricEnvelope) ConnectProducer(brokersUrl []string) (sarama.SyncProducer, error) {
+	config := sarama.NewConfig()
+	config.Producer.Return.Successes = true
+	config.Producer.RequiredAcks = sarama.WaitForAll
+	config.Producer.Retry.Max = 5
+	// NewSyncProducer creates a new SyncProducer using the given broker addresses and configuration.
+	conn, err := sarama.NewSyncProducer(brokersUrl, config)
+	if err != nil {
+		return nil, err
+	}
+	return conn, nil
+}
+func (f *FabricEnvelope) PushToQueue(brokersUrl []string, topic string, message []byte) error {
+
+	producer, err := f.ConnectProducer(brokersUrl)
+	if err != nil {
+		return err
+	}
+	defer producer.Close()
+	msg := &sarama.ProducerMessage{
+		Topic: topic,
+		Value: sarama.ByteEncoder(message),
+	}
+
+	if _, _, err := producer.SendMessage(msg); err != nil {
+		log.Fatal(err)
+		return err
+	}
+
+	return nil
 }
 
 func convertToTimestamp(timestampValue int64) *timestamppb.Timestamp {
